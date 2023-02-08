@@ -1,0 +1,44 @@
+version: '3.5'
+services:
+ mysql-server:
+  image: mysql:latest
+  networks:
+   - zbx_net
+  environment:
+   - MYSQL_USER=zabbix
+   - MYSQL_DATABASE=zabbixdb
+   - MYSQL_PASSWORD=PasswOrd
+   - MYSQL_ROOT_PASSWORD=StrongPassword
+ zabbix-server-mysql:
+  image: zabbix/zabbix-server-mysql:alpine-latest
+  networks:
+   - zbx_net
+  ports:
+   - 10051:10051
+  environment:
+   - DB_SERVER_HOST=mysql-server
+   - MYSQL_DATABASE=zabbixdb
+   - MYSQL_USER=zabbix
+   - MYSQL_PASSWORD=Passw0rd
+   - MYSQL_ROOT_PASSWORD=StrongPassword
+  depends_on:
+   - mysql-server
+ zabbix-web-nginx-mysql:
+  image: zabbix/zabbix-web-nginx-mysql:alpine-6.2-latest
+  networks:
+   - zbx_net
+  ports:
+   - 80:8080
+   - 443:8443
+  environment:
+   - ZBX_SERVER_HOST=zabbix-server-mysql
+   - DB_SERVER_HOST=mysql-server
+   - MYSQL_DATABASE=zabbixdb
+   - MYSQL_USER=zabbix
+   - MYSQL_PASSWORD=Passw0rd
+   - MYSQL_ROOT_PASSWORD=StrongPassword
+  depends_on:
+   - mysql-server
+   - zabbix-server-mysql
+networks:
+ zbx_net
